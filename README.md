@@ -96,14 +96,23 @@ L3 不可逆  删除 / 永久删除 / 关窗 / 杀进程 / 支付    原生模�
 ## 架构
 
 ```
-index.js                 宿主半边：9 个工具、风险分级、确认协议、审计、系统提示词
+index.js                 宿主半边：17 个工具、风险分级、确认协议、审计、工具集预设、系统提示词
 lib/policy.mjs           风险模型 / 红线 / 脱敏 / 凭证摘要
 lib/state.mjs            运行期配置（不用 schemastery Config，原因见下）
 lib/desk.mjs             子进程桥：一个动词 = 一次 PowerShell，JSON 进 JSON 出
 lib/audit.mjs            JSONL 审计 + 保留期清理 + 撤销清单
 lib/files.mjs            计划 → 确认 → 执行 → 撤销清单
+lib/stop.mjs             急停标记 + Esc 监听进程生命周期
+lib/session-lock.mjs     桌面互斥租约（desktop.lock 目录 + owner.json）
+lib/messages.mjs         错误码 / errno / CDP 异常的中文词典
+lib/browser.mjs          CDP 通道：读 DOM、点击、输入、等待
+lib/browser-zh.mjs       浏览器模块的导出边界：统一把英文异常翻成中文
+lib/settings-page.mjs    宿主侧渲染的设置页（自包含 HTML，无构建步骤）
+lib/cdp.mjs              极简 CDP 客户端（Node 内置 WebSocket）
 scripts/desk.ps1         Windows 桌面执行体：P/Invoke + UI Automation + WinRT OCR + WinForms 弹窗
+scripts/stop-watch.ps1   常驻 Esc 监听（只观察不吞键，写停止标记 + 心跳）
 scripts/selftest-target.ps1  自检靶子（不碰你的数据），用来验证键鼠注入链路
+test/*.mjs               四个单测：急停规则 / 设置页 / 桌面互斥 / 错误中文化
 ```
 
 **为什么桌面动作要另起 PowerShell 子进程？**
@@ -154,6 +163,8 @@ plugin_manager set_plugin target='include:dsh-computer-use' enabled=true
 
 保存即时生效（不用重启），带范围校验与裁剪；**安全边界不会被设置页关掉**。同一页还显示运行状态：总闸、模式、急停状态、Esc 监听心跳、上次 Esc。
 
+---
+
 ## 平台支持（发布前必须知道）
 
 本插件是针对 **DSH 插件 API** 写的（`ctx.tools` / `ctx.webServer` / `systemPrompt` 槽位 / `plugin_manager` 安装方式）。
@@ -171,12 +182,17 @@ plugin_manager set_plugin target='include:dsh-computer-use' enabled=true
 ```json
 {
   "paused": false,                // 总闸；true 时只读工具仍可用
+  "nonIntrusive": true,           // 默认不移动物理指针、不抢键盘焦点
+  "toolMode": "full",             // full / lite / lazy（改这个要重载插件）
+  "stopHoldMs": 60000,            // 一次 Esc / 按钮点击保持多久（改动类动作被拒）
   "confirmTimeoutMs": 30000,      // 弹窗超时 = 拒绝；confirmEnabled 恒为 true（关不掉）
   "allowedApps": ["notepad.exe", "..."],   // launch 白名单；名单外要过 L3 弹窗
   "protectedProcesses": ["explorer.exe", "..."],
   "allowRoots": [],               // 空 = 不额外限制（系统目录仍是硬红线）；填了则域外操作升级确认
   "observationTtlMs": 120000,     // 坐标点击的观察新鲜度
   "bulkThreshold": 10,            // ≥N 项的覆盖/移动升级为弹窗确认
+  "maxBatch": 500,                // 单次批量上限，超过直接拒绝
+  "browser": { "exePath": "", "headless": true },  // 留空=自动找 Edge/Chrome
   "logRetentionDays": 30, "shotRetentionDays": 7, "trashRetentionDays": 7
 }
 ```
@@ -232,6 +248,8 @@ run/           子进程临时交换文件（用后即删）
 
 **能力边界**：非侵入的前提是目标控件"有可编程入口"——要么支持 UI 自动化模式，要么有自己的窗口句柄。原生控件基本都有；**Chromium/Electron 的网页内容两者都没有**，所以网页里的按钮在非侵入模式下点不动，只能：① 接管模式（逐次批准），或 ② 走浏览器自动化（见下）。截图 + OCR 只是**看**，不会动鼠标，任何模式下都安全。
 
+---
+
 ## 浏览网页 / 在网页里做操作（browser_*，CDP）
 
 网页任务走 **Chrome DevTools 协议**，在页面内部完成操作：**不碰操作系统层面的鼠标键盘，也不碰你正在用的浏览器**。
@@ -276,6 +294,8 @@ Chromium 只有在有 UIA 客户端"问过"页面之后才构建无障碍树。`
 
 **实测对比（同一台机器、同一个 Edge 窗口）**：预热前 `tree` 只有 3 个匿名节点、`find` 命中 0；预热后能读到 `返回/前进/刷新/新建标签页/关闭标签页`、地址栏，以及网页根节点 `Document "标题" #RootWebArea = "https://页面地址"`，深层还能读到页面里的链接与输入框。网页内部仍然建议走 `browser_*`（CDP 读 DOM 更细），UIA 这条路适合"操作你已经开着的那个浏览器窗口"。
 
+---
+
 ## 错误信息：一律中文
 
 内部标识（错误码、errno、CDP 异常）不直接抛给用户。桌面执行体只吐**稳定的错误码**，中文放在 Node 侧的词典里：
@@ -290,6 +310,8 @@ UI 动作失败：窗口句柄无效或已经关闭（技术细节：0xdeadbeef�
 - 原始英文保留在「技术细节 / 原始信息」里，方便排查，但不占主句
 - 已经是中文的信息原样保留，不会套两层前缀
 - 验证：`node test/messages.mjs`（29 项）
+---
+
 ## 桌面互斥（多会话不打架）
 
 插件实例是**进程级共享**的：两个会话同时调 `computer_ui act` / `computer_input`，结果就是抢鼠标、抢前台、互相把对方的窗口切走，两边的"已验证"结论都会失真。
@@ -307,6 +329,8 @@ UI 动作失败：窗口句柄无效或已经关闭（技术细节：0xdeadbeef�
 - `computer_status` 与设置页都能看到：`桌面占用：空闲` / `桌面占用：computer_app 正在操作（持有 3 秒…）`
 
 **验证方式**：`node test/session-lock.mjs`（12 项：抢占、续租、非持有人不能释放、过期抢占、损坏/空锁接管、活跃锁不被清）。真并发也实测过——子 agent 在另一个会话里发起 `computer_files mkdir`，当场被 `computer_app` 的租约挡住。
+---
+
 ## 急停：Esc 键 / 页面上的停止按钮
 
 **两条通道，同一件事**：都只写一个停止标记（`%DSH_HOME%\computer-use\stop.json`），
@@ -343,13 +367,15 @@ UI 动作失败：窗口句柄无效或已经关闭（技术细节：0xdeadbeef�
 
 ```text
 computer_status                                  → 看「急停」那行的监听 pid、心跳、上次 Esc
-按一次 Esc，再看 computer_status                  → 「上次 Esc Ns 前（当时任务中/空闲…）」，两项会在 60s/10s 内显示"已停止"
+按一次 Esc，再看 computer_status                  → 「上次 Esc Ns 前（当时任务中/空闲…）」+「当前在停止中」
 任意改动类工具（如 computer_files mkdir）        → 被拒绝："【已停止】用户按下了停止（来源：esc）…"
 POST <endpoint 前缀>/resume                      → 立刻清除，工具恢复
-node test/stop-rules.mjs                         → 8 项判定规则单测（60s/10s/过期/旧格式）
+node test/stop-rules.mjs                         → 9 项判定规则单测（60 秒窗口 / 过期 / 旧格式 / 往返延迟）
 ```
 
+---
 
+## 参考与致谢
 
 本插件为独立实现，以下做法参考了 [Yu-tao-Li/dsh-computer-use-win](https://github.com/Yu-tao-Li/dsh-computer-use-win)（MIT，基于 [cgissing/windows-computer-use](https://github.com/cgissing/windows-computer-use) 衍生）的公开实现与文档，并在本机重新验证后才落地：
 
@@ -365,10 +391,13 @@ node test/stop-rules.mjs                         → 8 项判定规则单测（6
 
 **Esc 立即停止**：对方做得比本插件好，已补齐（见上文「急停」）。区别：对方是独立进程 + 键盘钩子监听并直接取消后端调用；本插件用 `GetAsyncKeyState` 轮询（不吞键）+ 共享停止标记，`desk.ps1` 在长循环里协作式检查。按钮通道是本插件额外加的。
 
+---
 
+## 已知边界
 
 - **Chromium 系应用（Edge/Electron）的网页内容**：已支持（见上文"Chromium 预热"），但最小化的窗口没有可唤醒的页面树，深层页面元素也建议走 `browser_*`。读不到时用 `computer_screenshot` + OCR 兜底。
 - **坐标是物理像素**：插件进程声明了 per-monitor DPI 感知，所以截图、UIA 矩形、鼠标坐标三者一致；但被操作的 DPI-unaware 程序内部布局可能和它的自报坐标不一致——以截图/OCR 的坐标为准。
 - **前台锁**：Windows 不允许后台进程随意抢焦点。激活走 `AttachThreadInput` 技巧，多数情况有效；失败时会明确报错，绝不盲打。
 - **弹窗只能由人点**。工具不会、也无法自己点自己的确认窗（这是设计目标，不是缺陷）。`state.json` 是用户可写的，所以"防的是模型，不是用户本人"。
+- **桌面是独占的**：一次只允许一个会话改动电脑（见「桌面互斥」）；两个会话同时操作会互相点错地方。
 - 目前只支持 Windows；macOS/Linux 需要另写一份 `desk` 执行体（接口是动词 + JSON）。
