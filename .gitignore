@@ -1,0 +1,21 @@
+# 依赖与构建产物
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# 运行时产物（插件运行时会生成在 %DSH_HOME%\computer-use\，不该进仓库）
+.cache/
+computer-use/
+*.log
+
+# 编辑器与系统文件
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.swp
+
+# 本地探测/临时脚本
+_netprobe.*
+_*probe*.txt

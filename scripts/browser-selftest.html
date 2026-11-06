@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>dsh-computer-use 浏览器自检页</title>
+  <style>
+    body { font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; margin: 40px; color: #1d2531; }
+    h1 { font-size: 20px; }
+    .row { margin: 14px 0; }
+    input[type="text"] { width: 260px; padding: 6px 8px; font-size: 14px; }
+    button { padding: 7px 16px; font-size: 14px; }
+    #result { margin-top: 18px; padding: 12px; border-radius: 6px; background: #eef6ff; border: 1px solid #cfe3ff; min-height: 22px; }
+    .muted { color: #6b7280; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>dsh-computer-use 浏览器自检页</h1>
+  <p class="muted">这个页面只在本机打开，用来验证 CDP 通道：读写 DOM、点按钮、填表单，全程不碰操作系统鼠标键盘。</p>
+
+  <div class="row">
+    <label for="name">收货人：</label>
+    <input id="name" name="receiver" type="text" placeholder="输入一个名字" />
+  </div>
+
+  <div class="row">
+    <label for="city">城市：</label>
+    <select id="city" name="city">
+      <option value="jinan">济南</option>
+      <option value="qingdao">青岛</option>
+      <option value="beijing">北京</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <label><input id="agree" type="checkbox" /> 我确认以上信息</label>
+  </div>
+
+  <div class="row">
+    <button id="go" type="button">预览结果</button>
+    <button id="danger" type="button">删除全部记录</button>
+  </div>
+
+  <div id="result">（还没有提交）</div>
+
+  <script>
+    document.getElementById('go').addEventListener('click', () => {
+      const name = document.getElementById('name').value.trim();
+      const city = document.getElementById('city').value;
+      const agree = document.getElementById('agree').checked;
+      const box = document.getElementById('result');
+      if (!name) { box.textContent = '预览失败：收货人为空'; return; }
+      if (!agree) { box.textContent = '预览失败：没有勾选确认'; return; }
+      box.textContent = `预览通过：${name} / ${city}`;
+      box.dataset.state = 'previewed';
+    });
+    document.getElementById('danger').addEventListener('click', () => {
+      document.getElementById('result').textContent = '已删除全部记录';
+    });
+  </script>
+</body>
+</html>

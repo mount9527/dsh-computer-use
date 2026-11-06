@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Computer use",
+    "description": "Operate this computer under guardrails: observe, plan, act, verify, log. The mouse stays yours by default, risky steps need a native confirmation dialog, and Esc or the on-page button stops a running task."
+  }
+}

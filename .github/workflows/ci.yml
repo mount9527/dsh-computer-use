@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Syntax + unit tests (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Node syntax check
+        shell: pwsh
+        run: |
+          $files = @('index.js') + (Get-ChildItem lib -Filter *.mjs | ForEach-Object { "lib/$($_.Name)" })
+          $failed = 0
+          foreach ($f in $files) {
+            node --check $f
+            if ($LASTEXITCODE -ne 0) { Write-Host "FAIL $f"; $failed++ } else { Write-Host "OK   $f" }
+          }
+          if ($failed -gt 0) { exit 1 }
+
+      - name: PowerShell scripts parse (Windows PowerShell 5.1)
+        shell: pwsh
+        run: |
+          $failed = 0
+          foreach ($f in (Get-ChildItem scripts -Filter *.ps1)) {
+            $tokens = $null; $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$tokens, [ref]$errors)
+            if ($errors.Count -gt 0) {
+              Write-Host "FAIL $($f.Name): $($errors[0].Message)"
+              $failed++
+            } else {
+              # desk.ps1 must stay pure ASCII: Windows PowerShell 5.1 reads BOM-less UTF-8 as ANSI
+              $bytes = [System.IO.File]::ReadAllBytes($f.FullName)
+              $nonAscii = ($bytes | Where-Object { $_ -gt 127 }).Count
+              if ($f.Name -ne 'selftest-target.ps1' -and $nonAscii -gt 0) {
+                Write-Host "FAIL $($f.Name): contains $nonAscii non-ASCII bytes"
+                $failed++
+              } else {
+                Write-Host "OK   $($f.Name)"
+              }
+            }
+          }
+          if ($failed -gt 0) { exit 1 }
+
+      - name: Unit tests
+        shell: pwsh
+        run: |
+          $failed = 0
+          foreach ($t in (Get-ChildItem test -Filter *.mjs)) {
+            Write-Host "== $($t.Name)"
+            node $t.FullName
+            if ($LASTEXITCODE -ne 0) { $failed++ }
+          }
+          if ($failed -gt 0) { exit 1 }
+
+  package:
+    name: npm package sanity
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm pack --dry-run
