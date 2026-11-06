@@ -1,6 +1,6 @@
 {
   "name": "dsh-computer-use",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "让 DSH 在这台 Windows 电脑上做可验证的操作：观察 → 计划 → 执行 → 验证 → 留痕。默认不接管鼠标键盘，L3 高危动作走原生模态确认，Esc/页面按钮随时急停。",
   "type": "module",
   "license": "MIT",
@@ -52,6 +52,7 @@
     "test/settings-page.mjs",
     "test/session-lock.mjs",
     "test/messages.mjs",
+    "test/files-redline.mjs",
     "cordis.patch.yml",
     "locale/*.json",
     "icon.svg",

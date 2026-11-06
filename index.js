@@ -32,7 +32,7 @@ import { dataDir, logsDir, shotsDir, trashDir } from './lib/paths.mjs';
 export const name = 'dsh-computer-use';
 export const inject = ['tools', 'systemPrompt'];
 
-const VERSION = '0.3.3';
+const VERSION = '0.3.4';
 
 // ---------------------------------------------------------------- 进程内护栏
 /** 同一时刻只允许一个模态确认：弹窗期间禁止其他动作（避免「遮罩期间还在动」）。 */
@@ -1478,6 +1478,7 @@ export function apply(ctx, config) {
         || (plan.op === 'move' && plan.count >= bulk)
         || (plan.warnings ?? []).some((w) => w.includes('allowRoots'));
       const mustConfirm = needsConfirm(plan.level, highRiskL2);
+      let confirmDecision = 'none';
 
       const targetList = plan.entries.map((e) => e.from);
       const fingerprint = digestOf({
@@ -1521,6 +1522,7 @@ export function apply(ctx, config) {
           });
           deny(confirmDenialMessage('computer_files', decision.decision, decision.reason));
         }
+        confirmDecision = decision.decision;
       }
 
       // 执行前重新核对目标集：确认期间文件系统可能已经变了（状态漂移就作废）
@@ -1543,7 +1545,7 @@ export function apply(ctx, config) {
         deny('确认之后目标集合发生变化（有文件新增/消失），本次凭证作废：请重新发起并再次确认。');
       }
 
-      const applied = executePlan(recheck, { agent: exec?.agent?.id });
+      const applied = executePlan(recheck, { agent: exec?.agent?.id, confirm: confirmDecision });
       const rows = [
         `已执行 ${op}：成功 ${applied.applied.length} 项${applied.failed.length ? `，失败 ${applied.failed.length} 项` : ''}`,
         `runId：${applied.runId}${applied.undoable ? `（可撤销：computer_files op=undo runId=${applied.runId}）` : '（不可撤销）'}`,
