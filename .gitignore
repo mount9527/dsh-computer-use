@@ -16,6 +16,9 @@ Thumbs.db
 Desktop.ini
 *.swp
 
+# 发布暂存目录（由 scripts/stage-release.mjs 生成）
+release/
+
 # 本地探测/临时脚本
 _netprobe.*
 _*probe*.txt
