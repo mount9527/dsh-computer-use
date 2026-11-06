@@ -1,4 +1,4 @@
 # dsh bundle patch：把本插件插入 profile 的层级栈
 - insert:
     - id: dsh-computer-use
-      name: 'dsh-computer-use'
+      name: '@mount9527/dsh-computer-use'

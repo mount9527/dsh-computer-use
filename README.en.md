@@ -37,7 +37,7 @@ Plus an **Operator contract** injected into the system prompt (risk model, hard 
 
 ```powershell
 # from npm (once published)
-dsh plugin --profile desktop add dsh-computer-use
+dsh plugin --profile desktop add @mount9527/dsh-computer-use
 
 # or from a local checkout
 plugin_manager install_bundle  target=<absolute path to this folder>
