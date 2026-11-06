@@ -32,7 +32,7 @@ import { dataDir, logsDir, shotsDir, trashDir } from './lib/paths.mjs';
 export const name = 'dsh-computer-use';
 export const inject = ['tools', 'systemPrompt'];
 
-const VERSION = '0.3.4';
+const VERSION = '0.3.5';
 
 // ---------------------------------------------------------------- 进程内护栏
 /** 同一时刻只允许一个模态确认：弹窗期间禁止其他动作（避免「遮罩期间还在动」）。 */
@@ -392,7 +392,11 @@ export function apply(ctx, config) {
         const url = new URL(req.url, 'http://local');
         const path = url.pathname.slice(PREFIX.length) || '/';
         if (req.method === 'GET' && path === '/status') return reply(res, 200, stateOf());
-        if (req.method === 'GET' && path === '/settings') return replyHtml(res, 200, renderSettingsHtml(loadState(), PREFIX));
+        if (req.method === 'GET' && path === '/settings') {
+          // ?embed=1：去掉固定的底部操作栏，用于整页截图/iframe 嵌入
+          const embed = url.searchParams.get('embed') === '1';
+          return replyHtml(res, 200, renderSettingsHtml(loadState(), PREFIX, { embed }));
+        }
         if (req.method === 'GET' && path === '/settings/status') {
           const st = loadState();
           return reply(res, 200, { ...stateOf(), nonIntrusive: st.nonIntrusive !== false });
@@ -1804,6 +1808,7 @@ export function apply(ctx, config) {
       properties: {
         mode: { type: 'string', enum: ['text', 'elements', 'screenshot'], description: '默认 text' },
         ocr: { type: 'boolean', description: 'mode=screenshot 时是否 OCR，默认 false' },
+        fullPage: { type: 'boolean', description: 'mode=screenshot 时截整页（越过视口，适合长表单/设置页），默认 false' },
         limit: { type: 'number', description: 'elements 最多返回多少个，默认 60' },
       },
     },
@@ -1818,7 +1823,7 @@ export function apply(ctx, config) {
       const limit = Number.isFinite(args?.limit) ? Math.max(1, Math.min(120, Math.floor(args.limit))) : 60;
 
       if (mode === 'screenshot') {
-        const shot = await browserScreenshot(live, { ocr: Boolean(args?.ocr) });
+        const shot = await browserScreenshot(live, { ocr: Boolean(args?.ocr), fullPage: args?.fullPage === true });
         const rows = [`页面截图：${shot.path}`, `${shot.w}×${shot.h} · ${shot.title}`, `URL：${shot.url}`];
         if (shot.ocr?.lines?.length) {
           rows.push(`OCR（${shot.ocr.lang || '?'}）：`);

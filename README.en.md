@@ -4,7 +4,16 @@
 
 Observe → plan → act → verify → log. The mouse stays yours (non-intrusive by default), irreversible steps need a native confirmation dialog, and you can stop a running task at any moment with **Esc** or the on-page button.
 
-> Status: early (0.2.0), Windows only. Requires DeepSeek Harness (DSH) with a `desktop` profile.
+> Status: early (0.3.4), Windows only. Requires DeepSeek Harness (DSH) with a `desktop` profile.
+
+## Screens
+
+| Settings page (⚙ bottom-right) | Confirmation dialog for irreversible steps |
+|---|---|
+| ![settings](docs/settings.png) | ![confirm](docs/confirm-dialog.png) |
+
+Both are real captures: the settings page via the plugin's own CDP channel (`browser_read mode=screenshot fullPage=true`), the dialog from a real `computer_files` delete.
+
 
 ## What it gives the agent
 
