@@ -32,7 +32,7 @@ import { dataDir, logsDir, shotsDir, trashDir } from './lib/paths.mjs';
 export const name = 'dsh-computer-use';
 export const inject = ['tools', 'systemPrompt'];
 
-const VERSION = '0.4.0';
+const VERSION = '0.4.1';
 
 // ---------------------------------------------------------------- 进程内护栏
 /** 同一时刻只允许一个模态确认：弹窗期间禁止其他动作（避免「遮罩期间还在动」）。 */

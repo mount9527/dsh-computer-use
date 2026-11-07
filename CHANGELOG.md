@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.1 (2026-11-07)
+
+只修文档，不动功能。
+
+### 修复
+
+- **README 安装段里的本机绝对路径**：原来的安装命令写着自己机器上的 `E:\ruanjianxiazai\...`，
+  公开仓库不该出现。改成三条正规路径：npm（推荐）/ `github:` 直装 / 本地克隆（占位路径）。
+  这也顺带修掉了 npm 页面上的安装说明——0.4.0 打包时带的是坏的那版。
+- `README.en.md` 去掉 `# from npm (once published)` 的历史注释；补了 `--profile web|desktop` 的说明。
+- `contrib/README.md` 里的 `cd` 路径换成占位。
+
+### 说明
+
+- 包名从 `@mount9527/...` 改为 `@li666/dsh-computer-use`：npm 用户名是 `li666`（`whoami` 实测），
+  `mount9527` 只是 GitHub 用户名（`npmjs.com/~mount9527` 为 404），scoped 包要求 scope 与账号一致。
+- GitHub 仓库仍是 `mount9527/dsh-computer-use`，npm 的 `repository` 字段指回它，市场靠这个关联。
+
+## 0.4.0 (2026-11-07)
+
+首次发布到 npm 与插件市场。
+
 ## 0.3.5 (2026-11-06)
 
 补仓库截图时顺带修掉的三件事，都是"真用起来才会撞到"的。
