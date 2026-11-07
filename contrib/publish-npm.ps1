@@ -9,6 +9,7 @@
 #   powershell -NoProfile -ExecutionPolicy Bypass -File contrib\publish-npm.ps1
 param(
   [switch]$Check,          # 只检查登录状态与包内容，不发布
+  [string]$Otp = '',       # 一次性 6 位 2FA 验证码（账号开了 2FA 就必须给）
   [string]$Node = '',
   [string]$Pnpm = ''
 )
@@ -83,7 +84,10 @@ Log ''
 Log '开始发布…'
 Push-Location $pkgDir
 try {
-  $out = (& $nodeExe $pnpmMjs publish --access public --no-git-checks 2>&1) | Out-String
+  $pubArgs = @('publish', '--access', 'public', '--no-git-checks')
+  if ($Otp) { $pubArgs += @('--otp', $Otp) }
+  Log ("执行: pnpm " + ($pubArgs -join ' '))
+  $out = (& $nodeExe $pnpmMjs @pubArgs 2>&1) | Out-String
   Log $out
   $code = $LASTEXITCODE
 } finally {

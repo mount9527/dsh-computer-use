@@ -6,7 +6,7 @@
 
 | 事实 | 影响 |
 |---|---|
-| npm 上 `dsh-computer-use` **已被他人占用**（`jerryweizhihao` 发布到 0.3.1，另一个 cua-driver 系插件） | 必须换名发布，本项目改用 `@mount9527/dsh-computer-use` |
+| npm 上 `dsh-computer-use` **已被他人占用**（`jerryweizhihao` 发布到 0.3.1，另一个 cua-driver 系插件） | 必须换名发布，本项目改用 `@li666/dsh-computer-use` |
 | 市场清单 = [`awesome-dsh-plugin`](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin) 的 `data/plugins/*.yml` | 投稿 = 一个 PR、一个 YAML 文件 |
 
 ## 为什么不在仓库里直接改包名
@@ -31,7 +31,7 @@ node scripts/stage-release.mjs
 ```
 
 它会按 `package.json` 的 `files` 复制文件到 `release/pkg/`（已被 .gitignore 忽略），并：
-- 把包名改成 `@mount9527/dsh-computer-use`
+- 把包名改成 `@li666/dsh-computer-use`
 - `cordis.patch.yml` 里只改 `name:`，`id:` 保持不变（带 `@`/`/` 的 id 不合法）
 
 ### 2. 发 npm
@@ -64,7 +64,7 @@ GitHub 仓库页 → About 右侧 ⚙ → Topics → 加 `dsh-plugin`。CI 会�
 
 ## 收录后市场里显示什么
 
-- 安装：`dsh plugin --profile web add @mount9527/dsh-computer-use`
+- 安装：`dsh plugin --profile web add @li666/dsh-computer-use`
 - 详情页截图：来自仓库根目录 `screenshots.json`（`docs/settings.png`、`docs/confirm-dialog.png`）
 - 图标：未声明 `icon:`，回退到 owner 头像；要自定义就加一个 **GitHub 托管的位图**（SVG 会被拒）
 

@@ -9,7 +9,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const PUBLISH_NAME = '@mount9527/dsh-computer-use';
+export const PUBLISH_NAME = '@li666/dsh-computer-use';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = dirname(here);
