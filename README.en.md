@@ -36,12 +36,18 @@ Plus an **Operator contract** injected into the system prompt (risk model, hard 
 ## Install
 
 ```powershell
-# from npm (once published)
-dsh plugin --profile desktop add @li666/dsh-computer-use
+# from npm (recommended)
+dsh plugin --profile web add @li666/dsh-computer-use
 
-# or from a local checkout
-plugin_manager install_bundle  target=<absolute path to this folder>
+# straight from the repository
+dsh plugin --profile web add github:mount9527/dsh-computer-use
+
+# from a local checkout (when hacking on it)
+git clone https://github.com/mount9527/dsh-computer-use
+plugin_manager install_bundle  target=<absolute path to the clone>
 ```
+
+Use `--profile desktop` instead of `--profile web` on the desktop build.
 
 Then **quit DSH completely and start it again** (closing the window is not enough — it keeps running in the tray), and **refresh the page (F5)** to get the floating stop button.
 

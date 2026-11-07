@@ -134,12 +134,30 @@ DSH 的 `pwsh` / `bash` 工具跑在**低完整性级别（Low IL）**的沙箱�
 
 ## 安装
 
+**从 npm（推荐）** —— 已在 npm 上，免构建、无原生依赖：
+
 ```powershell
-# 在 DSH 里用插件管理器安装（推荐）
-plugin_manager install_bundle  target=E:\ruanjianxiazai\deepseek\work\dsh-computer-use
+dsh plugin --profile web add @li666/dsh-computer-use
 ```
 
-装完即生效（新增 bundle 走 HMR）。改了 `index.js` / `lib/*.mjs` 之后热重载：
+**直接从仓库**（不经过 npm）：
+
+```powershell
+dsh plugin --profile web add github:mount9527/dsh-computer-use
+```
+
+**从本地源码**（自己改代码、调试时）：
+
+```powershell
+git clone https://github.com/mount9527/dsh-computer-use
+plugin_manager install_bundle  target=<克隆下来的绝对路径>
+```
+
+> 以上用的是 `web` profile；如果你跑的是桌面版，把 `--profile web` 换成 `--profile desktop`。
+
+装完 **完全退出 DSH 再打开**（只关窗口不算，它还在托盘里跑，不会加载新插件），然后 **刷新页面（F5）**。
+
+改了 `index.js` / `lib/*.mjs` 之后热重载（仅开发时需要）：
 
 ```powershell
 plugin_manager set_plugin target='include:dsh-computer-use' enabled=false

@@ -26,7 +26,7 @@
 ### 1. 生成发布包
 
 ```powershell
-cd E:\ruanjianxiazai\deepseek\work\dsh-computer-use
+cd <本仓库路径>
 node scripts/stage-release.mjs
 ```
 
