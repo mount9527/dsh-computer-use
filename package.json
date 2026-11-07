@@ -54,7 +54,8 @@
     "README.en.md",
     "CHANGELOG.md",
     "LICENSE",
-    "screenshots.json"
+    "screenshots.json",
+    "THIRD-PARTY-NOTICES.md"
   ],
   "dsh": {
     "bundle": {

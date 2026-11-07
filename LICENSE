@@ -19,19 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party notice
-
-This project is an independent implementation for DeepSeek Harness. Several
-techniques were learned from Yu-tao-Li/dsh-computer-use-win (MIT, itself
-derived from cgissing/windows-computer-use) and reimplemented here after being
-verified locally:
-
-- waking a Chromium page's UI Automation tree on demand
-- giving the pointer and the foreground window back after real input
-- the "sent" vs "observed" verification distinction
-- launching a program without stealing the foreground
-
-See "参考与致谢" in README.md for the exact mapping.
