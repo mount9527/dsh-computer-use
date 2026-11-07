@@ -72,7 +72,8 @@ if ($who -match 'UNAUTHORIZED|not logged in') {
 if ($Check) {
   Log ''
   Log '包内容预演：'
-  $packOut = (& $nodeExe $pnpmMjs pack --dry-run 2>&1) | Out-String
+  Push-Location $pkgDir
+  try { $packOut = (& $nodeExe $pnpmMjs pack --dry-run 2>&1) | Out-String } finally { Pop-Location }
   $lines.Add($packOut)
   Write-Host $packOut
   Log '（-Check 模式，未发布）'
